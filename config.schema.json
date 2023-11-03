@@ -1,0 +1,63 @@
+{
+  "pluginAlias": "knx-light-sensor",
+  "pluginType": "platform",
+  "singular": true,
+  "schema": {
+    "ip": {
+      "title": "KNX Router or Interface",
+      "type": "string",
+      "placeholder": "224.0.23.12",
+      "description": "IP of the KNX Router."
+    },
+    "port": {
+      "title": "KNX Port",
+      "type": "string",
+      "placeholder": "3671",
+      "description": "KNX Port"
+    },
+    "devices": {
+      "type": "array",
+      "items": {
+        "title": "Light Sensors",
+        "type": "object",
+        "properties": {
+          "name": {
+            "title": "Name",
+            "type": "string",
+            "required": true,
+            "placeholder": "Display Name for Light Sensor"
+          },
+          "listen_current_ambient_light_level": {
+            "title": "Current Ambient Light Level",
+            "type": "string",
+            "required": true,
+            "placeholder": "1/1/1",
+            "pattern": "^[0-9]{1,4}/[0-9]{1,4}/[0-9]{1,4}$"
+          }
+        }
+      }
+    }
+  },
+  "layout": [
+    {
+      "key": "devices",
+      "type": "array",
+      "orderable": false,
+      "buttonText": "Add Light Sensor",
+      "items": [
+        "devices[].name",
+        "devices[].listen_current_ambient_light_level"
+      ]
+    },
+    {
+      "type": "section",
+      "title": "Global",
+      "expandable": true,
+      "expanded": false,
+      "items": [
+        "ip",
+        "port"
+      ]
+    }
+  ]
+}
