@@ -1,5 +1,7 @@
 import { API, StaticPlatformPlugin, Logger, PlatformConfig, AccessoryPlugin, Service, Characteristic, uuid } from 'homebridge';
 
+import fakegato from 'fakegato-history';
+
 import { Connection } from 'knx';
 
 import { LightSensorAccessory } from './accessory';
@@ -21,6 +23,8 @@ export class LightSensorPlatform implements StaticPlatformPlugin {
     public readonly config: PlatformConfig,
     public readonly api: API,
   ) {
+    this.fakeGatoHistoryService = fakegato(this.api);
+
     // connect
     this.connection = new Connection({
       ipAddr: config.ip ?? '224.0.23.12',
@@ -41,8 +45,6 @@ export class LightSensorPlatform implements StaticPlatformPlugin {
         this.devices.push(new LightSensorAccessory(this, element));
       }
     });
-
-    log.info('finished initializing!');
   }
 
   accessories(callback: (foundAccessories: AccessoryPlugin[]) => void): void {

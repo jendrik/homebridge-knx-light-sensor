@@ -1,6 +1,7 @@
 import { AccessoryConfig, AccessoryPlugin, Service } from 'homebridge';
 
 import { Datapoint } from 'knx';
+import fakegato from 'fakegato-history';
 
 import { PLUGIN_NAME, PLUGIN_VERSION, PLUGIN_DISPLAY_NAME } from './settings';
 
@@ -15,7 +16,10 @@ export class LightSensorAccessory implements AccessoryPlugin {
   private readonly listen_current_ambient_light_level: string;
 
   private readonly lightSensorService: Service;
+  private readonly loggingService: fakegato;
   private readonly informationService: Service;
+
+  private ambientLightLevel: number;
 
   constructor(
     private readonly platform: LightSensorPlatform,
@@ -37,6 +41,8 @@ export class LightSensorAccessory implements AccessoryPlugin {
 
     this.lightSensorService = new platform.Service.LightSensor(this.name);
 
+    this.loggingService = new platform.fakeGatoHistoryService('custom', this, { storage: 'fs', log: platform.log });
+
     const dp_listen_current_temperature = new Datapoint({
       ga: this.listen_current_ambient_light_level,
       dpt: 'DPT9.004',
@@ -46,17 +52,26 @@ export class LightSensorAccessory implements AccessoryPlugin {
     const minPropValue = Number(this.lightSensorService.getCharacteristic(platform.Characteristic.CurrentAmbientLightLevel).props.minValue);
     const maxPropValue = Number(this.lightSensorService.getCharacteristic(platform.Characteristic.CurrentAmbientLightLevel).props.maxValue);
 
+    this.ambientLightLevel = minPropValue;
+
     dp_listen_current_temperature.on('change', (oldValue: number, newValue: number) => {
-      const value = Math.max(Math.min(newValue, maxPropValue), minPropValue);
-      platform.log.info(`Current Ambient Light Level: ${value}`);
-      this.lightSensorService.getCharacteristic(platform.Characteristic.CurrentAmbientLightLevel).updateValue(value);
+      this.ambientLightLevel = Math.max(Math.min(newValue, maxPropValue), minPropValue);
+      platform.log.info(`Current Ambient Light Level: ${this.ambientLightLevel}`);
+      this.lightSensorService.getCharacteristic(platform.Characteristic.CurrentAmbientLightLevel).updateValue(this.ambientLightLevel);
+      this.loggingService._addEntry({ time: Math.round(new Date().valueOf() / 1000), status: this.ambientLightLevel });
     });
+
+    // log light level every 10 minutes
+    setInterval(async () => {
+      this.loggingService._addEntry({ time: Math.round(new Date().valueOf() / 1000), status: this.ambientLightLevel });
+    }, 60 * 10 * 1000);
   }
 
   getServices(): Service[] {
     return [
       this.informationService,
       this.lightSensorService,
+      this.loggingService,
     ];
   }
 }

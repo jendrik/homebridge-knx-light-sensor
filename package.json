@@ -1,7 +1,7 @@
 {
   "displayName": "KNX Light Sensor",
   "name": "@jendrik/homebridge-knx-light-sensor",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Homebridge plugin for KNX Light Sensors",
   "license": "Apache-2.0",
   "repository": {
@@ -38,6 +38,7 @@
     "typescript": "^4.9.5"
   },
   "dependencies": {
+    "fakegato-history": "^0.6.4",
     "knx": "^2.5.2"
   }
 }
