@@ -1,18 +1,19 @@
-import { API, StaticPlatformPlugin, Logger, PlatformConfig, AccessoryPlugin, Service, Characteristic, uuid } from 'homebridge';
+import type { API, StaticPlatformPlugin, Logger, PlatformConfig, AccessoryPlugin, Service, Characteristic, uuid } from 'homebridge';
 
 import fakegato from 'fakegato-history';
 
 import { Connection } from 'knx';
 
-import { LightSensorAccessory } from './accessory';
+import { LightSensorAccessory } from './accessory.js';
 
 
 export class LightSensorPlatform implements StaticPlatformPlugin {
-  public readonly Service: typeof Service = this.api.hap.Service;
-  public readonly Characteristic: typeof Characteristic = this.api.hap.Characteristic;
-  public readonly uuid: typeof uuid = this.api.hap.uuid;
+  public readonly Service: typeof Service;
+  public readonly Characteristic: typeof Characteristic;
+  public readonly uuid: typeof uuid;
 
-  public readonly fakeGatoHistoryService;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public readonly fakeGatoHistoryService: any;
 
   public readonly connection: Connection;
 
@@ -23,6 +24,9 @@ export class LightSensorPlatform implements StaticPlatformPlugin {
     public readonly config: PlatformConfig,
     public readonly api: API,
   ) {
+    this.Service = api.hap.Service;
+    this.Characteristic = api.hap.Characteristic;
+    this.uuid = api.hap.uuid;
     this.fakeGatoHistoryService = fakegato(this.api);
 
     // connect
@@ -40,7 +44,8 @@ export class LightSensorPlatform implements StaticPlatformPlugin {
     });
 
     // read devices
-    config.devices.forEach(element => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    config.devices.forEach((element: any) => {
       if (element.name !== undefined && element.listen_current_ambient_light_level) {
         this.devices.push(new LightSensorAccessory(this, element));
       }
